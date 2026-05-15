@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="Cache-control" content="no-cache">
+		<meta http-equiv="pragma" content="no-cache" />
+
+		<title>IPS - Neology</title>
+		<link href="css/custom.css" rel="stylesheet"> 
+		<link href="css/bootstrap.css" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui.theme.css">
+		<link class="include" rel="stylesheet" type="text/css" href="css/jquery.jqplot.css" />
+		<link rel="stylesheet" type="text/css" href="css/datepicker.css">
+                <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+
+		<script type="text/javascript" src="js/libs/jquery-3.3.1.js"></script>
+		<script type="text/javascript" src="js/libs/jquery-ui.js"></script>
+		<script type="text/javascript" src="js/libs/jquery_datatable.js"></script>
+		<script type="text/javascript" src="js/libs/jquery.jqplot.js"></script>
+		<script type="text/javascript" src="js/libs/jqplot.highlighter.js"></script>
+		<script type="text/javascript" src="js/libs/jqplot.canvasAxisLabelRenderer.js"></script>
+		<script type="text/javascript" src="js/libs/jqplot.barRenderer.js"></script>
+		<script type="text/javascript" src="js/libs/jqplot.categoryAxisRenderer.js"></script>
+		<script type="text/javascript" src="js/libs/jqplot.dateAxisRenderer.js"></script>
+		<script type="text/javascript" src="js/libs/jqplot.pointLabels.js"></script>
+		<script type="text/javascript" src="js/libs/jqplot.canvasTextRenderer.js"></script>
+		<script type="text/javascript" src="js/libs/jqplot.canvasAxisTickRenderer.js"></script>
+		
+		<script type="text/javascript" src="js/libs/bootstrap-datepicker.js"></script>
+		<script type="text/javascript" src="js/app.js"></script>
+
+		
+		<style>
+		
+		body {
+		   font-family: Roboto,Helvetica Neue,Arial,sans-serif;
+		font-size: 13px;
+		line-height: 1.5;
+		color: #d8d9da;
+		background-color: #161719;
+		width: 99%;
+		position: absolute;	
+		
+	}  
+
+		</style>
+		
+		<script>
+		
+		 $( function() {
+		$( ".resizable" ).resizable();
+		$( ".resizable" ).draggable({ handle: "h3"});
+		
+	  } );
+
+	  $(document).ready(function(){
+		console.log('start');
+		$('#datepicker').datepicker({
+			 format: "yyyy-mm-dd",
+			 }
+		); 
+		
+		$('#datepickerAudit').datepicker({
+			 format: "yyyy-mm-dd",
+			 }
+		); 
+		
+		var d = new Date();
+		//d.setDate(d.getDate() - 7);
+		var date = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();	
+		$('#datepicker').datepicker('setValue', date);
+		$('#datepickerAudit').datepicker('setValue', date);
+		initLoad();
+	    displayWrapper("dashboard");
+
+		
+			
+	});
+	  
+	  
+
+	  
+	</script>
+
+
+	</head>
+	<body>
+		
+		<div id="header">
+			<div class="row no-margin">	
+				<div class="col-xs-5 no-padding navbar-header">						
+					<a class="navbar-brand" href="index.html"><span class="honey_italic"><img src="images/logo_neology.png" ></span></a>
+				</div>
+					
+				<div>
+					<label class= "titleLabel" id="pageTitle">Image Reviewer Dashboard</label>
+					<label class= "titleLabel" id="updateTime"></label>
+				</div>
+			</div>
+				
+			<div id="main-menu" class="row no-margin" >
+                <div id="page-wrapper" >
+					<ul class="nav nav-tabs dps-tabs" role="tablist">
+                        <li role="presentation" class='active' id="dashboard-button"><a href="#dashboard"  role="tab" data-toggle="tab" onclick="displayWrapper('dashboard'); " style=' font-size: 16px'>Image Reviewer Dashboard</a></li>
+                        <li role="presentation" id="status-button"><a href="#status"  role="tab" data-toggle="tab" onclick="displayWrapper('status'); "style=' font-size: 16px'>Image Transaction Status Dashboard</a></li>
+						<li role="presentation" id="audit-button"><a href="#audit"  role="tab" data-toggle="tab" onclick="displayWrapper('audit'); "style=' font-size: 16px'>Image Review Audit Dashboard</a></li>
+					</ul>
+				</div> 
+			</div> 
+		</div>
+		<div id='wrapper' >
+			<div class="tab-pane active main-content-wrapper" id="dashboard-wrapper" >
+				<div class="left">
+					<div id="resizable" class=" resizable">
+						<h3 >Time Horizon</h3>
+						<table id="timeHorizon" class="table" cellspacing="0" width="100%" style='margin-bottom:15px'>
+							<thead>
+								<tr>
+									<th data-field="userId">Facilities</th>
+									<th data-field="codeOffCount">Image Time Horizon</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					
+					<div id="resizable" class=" resizable">
+						<h3 >Queue Statistics</h3>
+						<table id="qStats" class="table" cellspacing="0" width="100%" style='margin-bottom:15px'>
+							<thead>
+								<tr>
+									<th data-field="userId">Queue Name</th>
+									<th data-field="codeOffCount">Oldest Transaction</th>
+									<th data-field="userId">No Of Transactions</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					
+					<div id="resizable" class=" resizable">
+						<h3 >Reviewers</h3>
+						<table id="reviewers" class="table" cellspacing="0" width="100%" style='margin-bottom:15px'>
+							<thead>
+								<tr>
+									<th data-field="userId">User</th>
+									<th data-field="codeOffCount"># of images coded off</th>
+									<th data-field="reviewCount"># of images keyed</th>
+									<th data-field="totalCount"># of total images reviewed</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+				
+				<div class="right">
+					<div id="resizable" class=" resizable">
+						<h3 >Total Backlog</h3>
+						<div id='backLogBox' class='title'>
+							<label class='titleLabel' id="totalBacklog"></label>
+						</div>
+					</div>
+						
+					<div id="resizable" class=" resizable">
+						<h3 >Backlog Chart <label class='info' id='info1' ></label></h3>
+						<div id="backLogChart"  style="height:430px; width:1250px;  right: 10px; top: 10px;"></div> 
+					</div>
+						
+					<div id="resizable" class=" resizable">
+						<h3 >Backlog Table</h3>
+						<table id="backLogTable" class="table" cellspacing="0" width="100%" style='margin-top:15px; '>
+							<thead>
+								<tr>
+									<th data-field="type">None</th>
+									<th data-field="date0">None</th>
+									<th data-field="date1">None</th>
+									<th data-field="date2">None</th>
+									<th data-field="date3">None</th>
+									<th data-field="date4">None</th>
+									<th data-field="date5">None</th>
+									<th data-field="date6">None</th>
+									<th data-field="date7">None</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			</div>
+				
+			<div class="tab-pane main-content-wrapper" id="status-wrapper" >
+				<div class=" resizable">
+					<h3 >Searching Criteria</h3>
+					<div id="txnStatusChart1"  style="height:30px; width:100%;  top: 10px;  padding-left:700px">
+						<label for="facility">Facility: </label>
+						<select name="facility" id="facility" class='search'>
+							<option value='75A'>75 A</option>
+							<option value='75B'>75 B</option>
+							<option value='ALL'>ALL</option>
+						</select>
+						<label for="datepicker" style='margin-left:100px'>Date: </label>
+						<input type='text'  data-provide="datepicker" name='datepicker' id='datepicker' style='width: 100px;' >
+						<button type="button" id='submitBtn' style='margin-left: 100px;'>Submit</button>
+						<p id="srvStatus" style='margin-left: 100px;'>Processing Data ...</p>
+						<label id="msg" style='margin-left:100px'></label>
+    
+					</div> 
+				</div>
+				<div class=" resizable">
+					<h3 >Image Review Status <label class='info' id='info2' ></label></h3>
+					<div id="imgReviewStatusChart"  style="height:210px; width:1700px;  left:20px; top: 10px; "></div> 
+				</div>
+					
+				<div class=" resizable">
+					<h3 >Image Review Completed Status <label class='info' id='info3' ></label></h3>
+					<div id="imgReviewCompletedStatusChart"  style="height:210px; width:1700px; left:20px; top: 10px;"></div> 
+				</div>
+						 
+				<div class=" resizable">
+					<h3 >Auto Passed Images vs Manual Review <label class='info' id='info4' ></label></h3>
+					<div id="autoImageVSmanualRewiew"  style="height:210px; width:1700px; left:20px; top: 10px;"></div> 
+				</div>
+
+			</div>
+		
+			<div class="tab-pane main-content-wrapper" id="audit-wrapper" >
+				<div class="left" style='width:25%'>
+					<div id="resizable" class=" resizable">
+						<h3 >Time Horizon</h3>
+						<table id="timeHorizonAudit" class="table" cellspacing="0" width="100%" style='margin-bottom:15px'>
+							<thead>
+								<tr>
+									<th data-field="userId">Facility</th>
+									<th data-field="codeOffCount">Image Time Horizon</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					
+					<div id="resizable" class=" resizable">
+						<h3 >Total Backlog</h3>
+						<table id="backLogAudit" class="table" cellspacing="0" width="100%" style='margin-bottom:15px'>
+							<thead>
+								<tr>
+									<th data-field="userId">Facility</th>
+									<th data-field="codeOffCount">Total Backlog</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					
+					<div id="resizable" class=" resizable">
+						<h3 >Reviewers</h3>
+						<table id="reviewersAudit" class="table" cellspacing="0" width="100%" style='margin-bottom:15px'>
+							<thead>
+								<tr>
+									<th data-field="userId">User</th>
+									<th data-field="codeOffCount"># of images coded off</th>
+									<th data-field="reviewCount"># of images keyed</th>
+									<th data-field="totalCount"># of total images reviewed</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					
+				</div>
+				
+				<div class="right" style='width:72%;'>
+					<div class=" resizable" >
+						<h3 >Searching Criteria</h3>
+						<div id="txnStatusChart1"  style="height:30px; width:100%;  top: 10px;  ">
+							<label for="datepickerAudit" style='margin-left:400px'>Date: </label>
+							<input type='text'  data-provide="datepicker" name='datepickerAudit' id='datepickerAudit' style='width: 100px;' >
+							<button type="button" id='submitAuditBtn' style='margin-left: 100px;'>Submit</button>
+							<p id="srvAuditStatus" style='margin-left: 100px;'>Processing Data ...</p>
+							<label id="msgAudit" style='margin-left:100px'></label>
+		
+						</div> 
+					</div>
+					
+					<div id="resizable" class=" resizable">
+						<h3 >Image Reviewer Audit Summary</h3>
+						<table id="reviewerAuditSummaryTable" class="table" cellspacing="0" width="100%" style='margin-top:15px; '>
+							<thead>
+								<tr>
+									<th data-field="auditorName">Auditor</th>
+									<th data-field="reviewerName">Reviewer Audited</th>
+									<th data-field="date1">Audit Date</th>
+									<th data-field="date2">Review Date Start</th>
+									<th data-field="date3">Review Date End</th>
+									<th data-field="date4">Images Audited</th>
+									<th data-field="date5">Number Passed</th>
+									<th data-field="date6">Number Failed</th>
+									<th data-field="date7">Skipped</th>
+									<th data-field="date7">Failed %</th>
+									<th data-field="date7">Passed %</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					
+					<div id="resizable" class=" resizable">
+						<h3 >Truth Set Summary</h3>
+						<table id="truthSetSummaryTable" class="table" cellspacing="0" width="100%" style='margin-top:15px; '>
+							<thead>
+								<tr>
+									<th data-field="type">Set Name</th>
+									<th data-field="date0">Initiated By</th>
+									<th data-field="date1">User</th>
+									<th data-field="date2">Created Date</th>
+									<th data-field="date3">Run date</th>
+									<th data-field="date4">Status</th>
+									<th data-field="date5">Percent Complete</th>
+									<th data-field="date6">Percent Accuracy</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				
+				</div>
+				
+				
+		    </div>
+				
+		</div>
+		
+	</body>
+
+</html>
+

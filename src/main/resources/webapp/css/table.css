@@ -1,0 +1,65 @@
+table#configurationTable {
+    display: table;
+    width: 725px;
+	margin-bottom:0;
+	border:1px solid #eee;
+}
+table#configurationTable thead, table#configurationTable tbody {
+ 
+	border:1px solid #eee;
+}
+table#configurationTable tbody {
+    overflow: auto;
+    height: 100px;
+}
+ table#configurationTable tr , table#configurationTable tr {
+	border:1px solid #eee;
+} 
+table.scroll {
+	table-layout: fixed;
+    width: 100%; 
+    border-spacing: 0;
+}
+
+
+table.scroll tbody {
+   /*  height: 101px; */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+table.scroll thead th {
+    white-space: normal; 
+    border: 1px solid #909090;
+	padding:5px;
+	background-color:#C3C3C3;
+}
+table.scroll tbody td{
+    /* white-space: normal; */
+    border-right: 1px solid #909090;
+	border-bottom: 1px solid #909090;
+	    border-left: 1px solid #909090;
+	padding:5px;
+}
+table.scroll tbody tr input{width:100%;}
+
+thead tr th { 
+    height: 24px;
+    cursor: default !important;
+}
+
+tbody { border-top: 0 none; }
+
+#tollRatesTable td{
+	 word-break: normal !important;
+}
+
+#tableChartContent{    
+	/*width: 1500px; */
+    height: auto;
+	overflow-x: scroll;
+	overflow-y: hidden;
+}
+
+#tollRatesTable .dataTable{
+	margin-top: 10px;
+}
