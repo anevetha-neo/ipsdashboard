@@ -116,7 +116,8 @@ public class DashboardService {
         dto.setUserStats(users);
         LOGGER.info("Populated user stats data.");
         dto.setBackLogDays(buildBacklogDays(today));
-        dto.setRefreshTime(LocalDateTime.now().toString());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a");
+        dto.setRefreshTime((LocalDateTime.now()).format(dtf));
         dto.setProcessingTime(System.currentTimeMillis() - start);
         cachedStats = dto;
         LOGGER.info("Full dashboard refreshed in {} ms", System.currentTimeMillis() - start);
