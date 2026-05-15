@@ -14,9 +14,9 @@ public class QueueStatsDto extends BaseEntity {
     
     private String minDate;
     
-    private int queueLength;
+    private String queueLength;
 
-    public QueueStatsDto(String queueName, String minDate, int queueLength) {
+    public QueueStatsDto(String queueName, String minDate, String queueLength) {
         this.queueName = queueName;
         this.minDate = minDate;
         this.queueLength = queueLength;

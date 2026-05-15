@@ -23,9 +23,9 @@ public class DashboardStatsDto extends BaseEntity {
     
     private int totalBacklog;
     
-    private int backlog75A;
+    private String backlog75A;
     
-    private int backlog75B;
+    private String backlog75B;
     
     private Collection<UserStatsDto> userStats = new ArrayList<>();
     

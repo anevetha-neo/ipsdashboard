@@ -12,8 +12,7 @@ import java.time.LocalDate;
 @Setter
 public class BacklogDaysDto extends BaseEntity {
     
-//    @JsonbDateFormat(value = "EEEE, MMMM dd, yyyy")
-    private LocalDate backlogDate;
+    private String backlogDate;
     
     private int totalReceived;
     
@@ -21,11 +20,11 @@ public class BacklogDaysDto extends BaseEntity {
     
     private int processed;
 
-    public BacklogDaysDto(LocalDate backlogDate) {
+    public BacklogDaysDto(String backlogDate) {
         this.backlogDate = backlogDate;
     }
     
-    public BacklogDaysDto(LocalDate backlogDate, int pending) {
+    public BacklogDaysDto(String backlogDate, int pending) {
         this.backlogDate = backlogDate;
         this.pending = pending;
         this.totalReceived = pending;

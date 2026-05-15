@@ -12,10 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,8 +70,8 @@ public class DashboardService {
                 backlog75B = count;
             }
         }
-        dto.setBacklog75A(backlog75A);
-        dto.setBacklog75B(backlog75B);
+        dto.setBacklog75A(formatNumber(backlog75A));
+        dto.setBacklog75B(formatNumber(backlog75B));
         dto.setTotalBacklog(backlog75A + backlog75B);
         LOGGER.info("Populated Backlog data.");
         LocalDate today = LocalDate.now();
@@ -98,14 +96,14 @@ public class DashboardService {
         }
         dto.setDailyReviewStats(dailyList);
         LOGGER.info("Populated Daily review stats data.");
-        List<Object[]> queueData = requestRepository.statusCountByDate(today, today.plusDays(1));
+        List<Object[]> queueData = activeTxnLogRepository.queueStats();
 
         List<QueueStatsDto> queueList = new ArrayList<>();
-        for (Object[] o : queueData) {
-            int count = ((Number) o[0]).intValue();
-            String facility = String.valueOf(o[1]);
-            String status = String.valueOf(o[2]);
-            QueueStatsDto q = new QueueStatsDto("status-" + status, LocalDateTime.now().toString(), count);
+        for (Object[] row : queueData) {
+            String status = String.valueOf(row[0]);
+            LocalDateTime oldest = ((java.sql.Timestamp) row[1]).toLocalDateTime();
+            int count = ((Number) row[2]).intValue();
+            QueueStatsDto q = new QueueStatsDto(status, oldest.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a")), formatNumber(count));
             queueList.add(q);
         }
         dto.setQueueStatsList(queueList);
@@ -134,6 +132,10 @@ public class DashboardService {
         return dto;
     }
 
+    private String formatNumber(int value) {
+        return java.text.NumberFormat.getNumberInstance().format(value);
+    }
+
     private String calculateTimeHorizon(Object dbValue) {
         if (dbValue == null) {
             return "0";
@@ -144,8 +146,9 @@ public class DashboardService {
         } else {
             return "0";
         }
-        long hours = java.time.Duration.between(oldest, LocalDateTime.now()).toHours();
-        return String.valueOf(hours);
+        return oldest.format(
+                java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a")
+        );
     }
 
     public AuditDisplayDto getAuditDisplay(String dateStr) {
@@ -190,7 +193,7 @@ public class DashboardService {
             int totalReceived = receivedMap.getOrDefault(day, 0);
             int processed = Math.max(totalReceived - pending, 0);
             BacklogDaysDto dto = new BacklogDaysDto();
-            dto.setBacklogDate(day);
+            dto.setBacklogDate(day.format(DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy")));
             dto.setPending(pending);
             dto.setProcessed(processed);
             dto.setTotalReceived(totalReceived);
