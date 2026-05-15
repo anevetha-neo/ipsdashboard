@@ -43,12 +43,12 @@ public interface ActiveTxnLogRepository extends JpaRepository<ActiveTxnLog, Stri
     Object findOldestPendingForFacility(String facility);
 
     @Query(value = """
-    select atl.status,
+    select atl.queue_name,
            min(atl.transaction_date),
            count(*)
     from ips.active_txn_log atl
     where atl.status = 'IN_PROGRESS'
-    group by atl.status
+    group by atl.queue_name
 """, nativeQuery = true)
     List<Object[]> queueStats();
 }

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -96,18 +97,8 @@ public class DashboardService {
         }
         dto.setDailyReviewStats(dailyList);
         LOGGER.info("Populated Daily review stats data.");
-        List<Object[]> queueData = activeTxnLogRepository.queueStats();
-
-        List<QueueStatsDto> queueList = new ArrayList<>();
-        for (Object[] row : queueData) {
-            String status = String.valueOf(row[0]);
-            LocalDateTime oldest = ((java.sql.Timestamp) row[1]).toLocalDateTime();
-            int count = ((Number) row[2]).intValue();
-            QueueStatsDto q = new QueueStatsDto(status, oldest.format(DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a")), formatNumber(count));
-            queueList.add(q);
-        }
-        dto.setQueueStatsList(queueList);
-        LOGGER.info("Populated Queue data.");
+        dto.setQueueStatsList(buildQueueStats());
+        LOGGER.info("Populated Queue Statistics data.");
         Collection<UserStatsDto> users = new ArrayList<>();
 
         LocalDateTime startTs = today.atStartOfDay();
@@ -130,6 +121,47 @@ public class DashboardService {
         cachedStats = dto;
         LOGGER.info("Full dashboard refreshed in {} ms", System.currentTimeMillis() - start);
         return dto;
+    }
+
+    private List<QueueStatsDto> buildQueueStats() {
+        long start = System.currentTimeMillis();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a");
+        NumberFormat nf = NumberFormat.getNumberInstance();
+        List<Object[]> statusNameRows = requestRepository.findQueueStatusNames();
+        Map<Integer, QueueStatsDto> byStatusOrd = new HashMap<>();
+        LocalDateTime now = LocalDateTime.now();
+        for (Object[] row : statusNameRows) {
+            int ord = ((Number) row[0]).intValue();
+            String name = String.valueOf(row[1]);
+            QueueStatsDto dto = new QueueStatsDto();
+            dto.setQueueName(name);
+            dto.setMinDate(now.format(dtf));
+            dto.setQueueLength("0");
+            byStatusOrd.put(ord, dto);
+        }
+        List<Object[]> statsRows = requestRepository.findQueueStats();
+        for (Object[] row : statsRows) {
+            int statusOrd = ((Number) row[0]).intValue();
+            QueueStatsDto dto = byStatusOrd.get(statusOrd);
+            if (dto == null) {
+                continue;
+            }
+            LocalDateTime oldest;
+            Object minDateObj = row[1];
+            if (minDateObj instanceof java.sql.Timestamp ts) {
+                oldest = ts.toLocalDateTime();
+            } else if (minDateObj instanceof java.sql.Date d) {
+                oldest = d.toLocalDate().atStartOfDay();
+            } else {
+                oldest = now;
+            }
+            int count = ((Number) row[2]).intValue();
+            dto.setMinDate(oldest.format(dtf));
+            dto.setQueueLength(formatNumber(count));
+        }
+        List<QueueStatsDto> result = new ArrayList<>(byStatusOrd.values());
+        LOGGER.info("Time elapsed for getQueueStats (legacy-equivalent): {} ms", System.currentTimeMillis() - start);
+        return result;
     }
 
     private String formatNumber(int value) {
@@ -158,8 +190,6 @@ public class DashboardService {
         LOGGER.info("Fetching audit and truthRun for {}", date);
         List<AuditSummary> auditList = auditSummaryRepository.findByAuditDateBetween(date, nextDay);
         List<TruthRun> truthRunList = truthRunRepository.findByCreationDateBetween(date.atStartOfDay(), nextDay.atStartOfDay());
-//        List<TruthRun> truthRunList = truthRunRepository.findByCreationDateBetween(date, nextDay);
-
         AuditDisplayDto dto = new AuditDisplayDto();
         dto.setAuditSummaryCol(auditList);
         dto.setTruthRunCol(truthRunList);
@@ -211,13 +241,6 @@ public class DashboardService {
         } else {
             throw new IllegalArgumentException("Unsupported date type: " + dbValue);
         }
-    }
-
-    private int mapToInt(Object dbValue) {
-        if (dbValue instanceof Number n) {
-            return n.intValue();
-        }
-        throw new IllegalArgumentException("Unsupported number type: " + dbValue);
     }
 
     @PostConstruct

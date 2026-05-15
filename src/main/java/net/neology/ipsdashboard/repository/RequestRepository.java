@@ -9,13 +9,18 @@ import java.util.List;
 
 public interface RequestRepository extends JpaRepository<Request, String> {
 
-    @Query(value = "select count(*), r.facility_code, r.status from ips.request r " +
-            "where r.transaction_date between ?1 and ?2 group by r.facility_code, r.status",
-            nativeQuery = true)
-    List<Object[]> statusCountByDate(LocalDate start, LocalDate end);
+    @Query(value = """
+        select rs.request_status_ord, rs.request_status
+        from ips.request_status rs
+        where rs.request_status_ord in (1,4,5,6,7,9,12)
+        """, nativeQuery = true)
+    List<Object[]> findQueueStatusNames();
 
-    @Query(value = "select count(*), r.status from ips.request r " +
-            "where r.transaction_date between ?1 and ?2 and r.facility_code = ?3 group by r.status",
-            nativeQuery = true)
-    List<Object[]> statusCountByDateAndFacility(LocalDate start, LocalDate end, String facilityCode);
+    @Query(value = """
+        select r.status, min(r.transaction_date), count(*)
+        from ips.request r
+        where r.status in (1,4,5,6,7,9,12)
+        group by r.status
+        """, nativeQuery = true)
+    List<Object[]> findQueueStats();
 }
